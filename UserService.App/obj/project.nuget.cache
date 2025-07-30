@@ -1,8 +1,26 @@
 {
   "version": 2,
-  "dgSpecHash": "A1n7JzUPtForQ854iR2HCHTOVxPRVGc97GmxK0SCdunCjSEb+ZnTrjiagdJsa4F+yWVLsFUadPx+FhCdoS7qZg==",
+  "dgSpecHash": "NSf4/XnM/XTyfuHrKRhdZZBEawrflylcgSech7yoVwv3ql7ap/FoZAWCiCuWH4NFe/IxpHDVIkkws6q52LUQWA==",
   "success": true,
   "projectFilePath": "/home/ivan/Desktop/TrailBlaze/UserService/UserService.App/UserService.App.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/home/ivan/.nuget/packages/mapster/7.4.2-pre02/mapster.7.4.2-pre02.nupkg.sha512",
+    "/home/ivan/.nuget/packages/mapster.core/1.2.3-pre02/mapster.core.1.2.3-pre02.nupkg.sha512",
+    "/home/ivan/.nuget/packages/microsoft.entityframeworkcore/8.0.18/microsoft.entityframeworkcore.8.0.18.nupkg.sha512",
+    "/home/ivan/.nuget/packages/microsoft.entityframeworkcore.abstractions/8.0.18/microsoft.entityframeworkcore.abstractions.8.0.18.nupkg.sha512",
+    "/home/ivan/.nuget/packages/microsoft.entityframeworkcore.analyzers/8.0.18/microsoft.entityframeworkcore.analyzers.8.0.18.nupkg.sha512",
+    "/home/ivan/.nuget/packages/microsoft.entityframeworkcore.relational/8.0.4/microsoft.entityframeworkcore.relational.8.0.4.nupkg.sha512",
+    "/home/ivan/.nuget/packages/microsoft.extensions.caching.abstractions/8.0.0/microsoft.extensions.caching.abstractions.8.0.0.nupkg.sha512",
+    "/home/ivan/.nuget/packages/microsoft.extensions.caching.memory/8.0.1/microsoft.extensions.caching.memory.8.0.1.nupkg.sha512",
+    "/home/ivan/.nuget/packages/microsoft.extensions.configuration.abstractions/8.0.0/microsoft.extensions.configuration.abstractions.8.0.0.nupkg.sha512",
+    "/home/ivan/.nuget/packages/microsoft.extensions.dependencyinjection/8.0.1/microsoft.extensions.dependencyinjection.8.0.1.nupkg.sha512",
+    "/home/ivan/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.2/microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
+    "/home/ivan/.nuget/packages/microsoft.extensions.logging/8.0.1/microsoft.extensions.logging.8.0.1.nupkg.sha512",
+    "/home/ivan/.nuget/packages/microsoft.extensions.logging.abstractions/8.0.2/microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512",
+    "/home/ivan/.nuget/packages/microsoft.extensions.options/8.0.2/microsoft.extensions.options.8.0.2.nupkg.sha512",
+    "/home/ivan/.nuget/packages/microsoft.extensions.primitives/8.0.0/microsoft.extensions.primitives.8.0.0.nupkg.sha512",
+    "/home/ivan/.nuget/packages/npgsql/8.0.7/npgsql.8.0.7.nupkg.sha512",
+    "/home/ivan/.nuget/packages/npgsql.entityframeworkcore.postgresql/8.0.4/npgsql.entityframeworkcore.postgresql.8.0.4.nupkg.sha512"
+  ],
   "logs": []
 }
