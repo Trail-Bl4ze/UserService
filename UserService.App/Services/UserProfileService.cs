@@ -19,7 +19,7 @@ public class UserProfileService : IUserProfileService
         FConfiguration = configuration;
     }
 
-    public async Task<UserProfile> AddUserProfileAsync(UserProfileDto userProfileDto)
+    public async Task<UserProfileDto> AddUserProfileAsync(UserProfileDto userProfileDto)
     {
         var user = await FContext.Users.FirstOrDefaultAsync(u => u.Id == userProfileDto.UserId);
         if (user == null)
@@ -30,10 +30,10 @@ public class UserProfileService : IUserProfileService
         await FContext.UserProfiles.AddAsync(profile);
         await FContext.SaveChangesAsync();
 
-        return profile;
+        return profile.Adapt<UserProfileDto>();
     }
 
-    public async Task<UserProfile> UpdateUserProfileAsync(Guid userId, UserProfileDto updateDto)
+    public async Task<UserProfileDto> UpdateUserProfileAsync(Guid userId, UserProfileDto updateDto)
     {
         var existingProfile = await FContext.UserProfiles
             .FirstOrDefaultAsync(p => p.UserId == userId);
@@ -46,12 +46,12 @@ public class UserProfileService : IUserProfileService
         FContext.UserProfiles.Update(existingProfile);
         await FContext.SaveChangesAsync();
 
-        return existingProfile;
+        return existingProfile.Adapt<UserProfileDto>();
     }
     
-    public async Task<UserProfile?> GetUserProfileAsync(Guid userId)
+    public async Task<UserProfileDto?> GetUserProfileAsync(Guid userId)
     {
-        return await FContext.UserProfiles
-            .FirstOrDefaultAsync(p => p.UserId == userId);
+        return (await FContext.UserProfiles
+            .FirstOrDefaultAsync(p => p.UserId == userId)).Adapt<UserProfileDto?>();
     }
 }
