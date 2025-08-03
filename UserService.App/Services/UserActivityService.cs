@@ -33,7 +33,7 @@ public class UserActivityService : IUserActivityService
         return activity.Adapt<UserActivityDTO>();
     }
 
-    public async Task<UserActivityDTO> UpdateUserProfileAsync(Guid userId, UserActivityDTO updateDto)
+    public async Task<UserActivityDTO> UpdateUserActivityAsync(Guid userId, UserActivityDTO updateDto)
     {
         var existingActivity = await FContext.UserActivities
             .FirstOrDefaultAsync(p => p.UserId == userId);

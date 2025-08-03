@@ -9,16 +9,16 @@ namespace UserService.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize] // Требует аутентификации
-public class UserActivitiesController : ControllerBase
+public class UserProfileController : ControllerBase
 {
-    private readonly IUserActivityService FActivityService;
+    private readonly IUserProfileService FProfileService;
     private readonly IHttpContextAccessor FHttpContextAccessor;
 
-    public UserActivitiesController(
-        IUserActivityService activityService, 
+    public UserProfileController(
+        IUserProfileService profileService, 
         IHttpContextAccessor httpContextAccessor)
     {
-        FActivityService = activityService;
+        FProfileService = profileService;
         FHttpContextAccessor = httpContextAccessor;
     }
 
@@ -35,14 +35,14 @@ public class UserActivitiesController : ControllerBase
 
     // Добавление активности
     [HttpPost]
-    public async Task<IActionResult> AddActivity([FromBody] UserActivityDTO activityDto)
+    public async Task<IActionResult> AddProfile([FromBody] UserProfileDto profileDto)
     {
         try
         {
             var userId = GetUserIdFromToken();
-            activityDto.UserId = userId; // Привязываем к пользователю
+            profileDto.UserId = userId;
             
-            var result = await FActivityService.AddUserActivitysync(activityDto);
+            var result = await FProfileService.AddUserProfileAsync(profileDto);
             return Ok(result);
         }
         catch (Exception ex)
@@ -51,16 +51,15 @@ public class UserActivitiesController : ControllerBase
         }
     }
 
-    // Обновление активности
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateActivity(Guid id, [FromBody] UserActivityDTO updateDto)
+    public async Task<IActionResult> UpdateProfile(Guid id, [FromBody] UserProfileDto updateDto)
     {
         try
         {
             var userId = GetUserIdFromToken();
             updateDto.UserId = userId;
             
-            var result = await FActivityService.UpdateUserActivityAsync(userId, updateDto);
+            var result = await FProfileService.UpdateUserProfileAsync(userId, updateDto);
             return Ok(result);
         }
         catch (KeyNotFoundException ex)
@@ -75,37 +74,13 @@ public class UserActivitiesController : ControllerBase
 
     // Получение всех активностей пользователя
     [HttpGet]
-    public async Task<IActionResult> GetAllActivities()
+    public async Task<IActionResult> GetProfileAsync()
     {
         try
         {
             var userId = GetUserIdFromToken();
-            var activities = await FActivityService.GetAllUserActivitiesAsync(userId);
+            var activities = await FProfileService.GetUserProfileAsync(userId);
             return Ok(activities);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
-
-    // Удаление активности
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteActivity(Guid id)
-    {
-        try
-        {
-            var userId = GetUserIdFromToken();
-            var affectedRows = await FActivityService.DeleteUserActivityAsync(id);
-            
-            if (affectedRows == 0)
-                return NotFound("Активность не найдена или не принадлежит пользователю");
-                
-            return Ok(new { Deleted = true });
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
         }
         catch (Exception ex)
         {
