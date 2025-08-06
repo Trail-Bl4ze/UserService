@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace UserService.Domain.Entities
 {
 
-    [Table("user_activity", Schema = "user")]
+    [Table("user_activities", Schema = "account")]
     public class UserActivity
     {
         [Key]
@@ -32,7 +32,10 @@ namespace UserService.Domain.Entities
 
     public class PhotoCoordinate
     {
+        [Column("latitude")]
         public double Latitude { get; set; }
+
+        [Column("longitude")]
         public double Longitude { get; set; }
     }
 }

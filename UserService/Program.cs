@@ -4,9 +4,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using UserService.App.Interfaces;
+using UserService.App.Models;
 using UserService.App.Services;
 using UserService.Domain;
-using UserService.Domain.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,9 +16,10 @@ var configuration = builder.Configuration;
 // Добавление сервисов
 builder.Services.AddControllers();
 
-// Настройка DbContext
+var connectionString = builder.Configuration.GetConnectionString("PostgreSQL");
+    
 builder.Services.AddDbContext<UserDbContext>(options =>
-    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 // Регистрация сервисов приложения
 builder.Services.AddScoped<IUserActivityService, UserActivityService>();
@@ -26,37 +27,55 @@ builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddHttpContextAccessor();
 
 // Конфигурация JWT
-var jwtConfig = builder.Configuration.GetSection("Jwt");
-var jwtSecret = jwtConfig["Secret"] ?? 
-    throw new ArgumentNullException("Jwt:Secret", "JWT Secret is not configured");
+// Конфигурация JWT
+var authSettings = builder.Configuration.GetSection("AuthenticationSettings").Get<AuthenticationSettings>();
+var key = Encoding.ASCII.GetBytes(authSettings.Secret);
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+// Настройка аутентификации
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            
             ValidateIssuer = false,
             ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSecret))
+            ValidateLifetime = false,
+            RequireExpirationTime = false,
+            ClockSkew = TimeSpan.Zero
+        };
+        
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+                return Task.CompletedTask;
+            }
         };
     });
-
+    
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "UserService API", Version = "v1" });
-    
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+
+    // Добавляем кнопку авторизации в Swagger UI
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme",
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
-    
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -66,12 +85,17 @@ builder.Services.AddSwaggerGen(c =>
                 {
                     Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"
-                }
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header
             },
-            Array.Empty<string>()
+            new List<string>()
         }
     });
 });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 

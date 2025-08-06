@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UserService.Domain.Entities
 {
-    [Table("user_profiles", Schema = "user")]
+    [Table("user_profiles", Schema = "account")]
     public class UserProfile
     {
         [Key]
