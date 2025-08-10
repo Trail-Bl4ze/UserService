@@ -1,7 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using UserService.App.Interfaces;
 using UserService.App.Models;
 
@@ -23,12 +25,70 @@ public class UserProfileController : ControllerBase
         FHttpContextAccessor = httpContextAccessor;
     }
 
+    [Authorize]
+    [HttpGet("check-context")]
+    public IActionResult CheckContext()
+    {
+        return Ok(new
+        {
+            User.Identity.IsAuthenticated,
+            User.Identity.Name, // Должно быть "7834e73d-4f89-42e4-ad3c-1b5f162c8e23"
+            Claims = User.Claims.Select(c => new { c.Type, c.Value })
+        });
+    }
+
+    [AllowAnonymous]
+    [HttpGet("validate-token")]
+    public IActionResult ValidateTokenManually()
+    {
+        var token = Request.Headers["Authorization"].FirstOrDefault()?.Replace("Bearer ", "");
+        var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("12345678901234567890123456789012"));
+        
+        try
+        {
+            var validator = new JwtSecurityTokenHandler();
+            var principal = validator.ValidateToken(token, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = key,
+                ValidateIssuer = true,
+                ValidIssuer = "trailblaze",
+                ValidateAudience = true,
+                ValidAudience = "trailblaze",
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            }, out _);
+
+            return Ok(new {
+                IsValid = true,
+                Claims = principal.Claims.Select(c => new { c.Type, c.Value })
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Error = ex.Message });
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpGet("debug")]
+    public IActionResult Debug()
+    {
+        var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+        var user = HttpContext.User.Identity?.IsAuthenticated;
+        return Ok(new { 
+            Header = authHeader,
+            IsAuthenticated = user,
+            Claims = User.Claims.Select(c => new { c.Type, c.Value })
+        });
+    }
+
     // Получение ID пользователя из токена
     private Guid GetUserIdFromToken()
     {
         // 1. Получаем заголовок Authorization
         var authHeader = Request.Headers["Authorization"].FirstOrDefault();
-        
+
         if (string.IsNullOrEmpty(authHeader))
         {
             throw new UnauthorizedAccessException("Authorization header is missing");
@@ -36,19 +96,19 @@ public class UserProfileController : ControllerBase
 
         // 2. Извлекаем токен (формат: "Bearer {token}")
         var token = authHeader.Split(' ').Last();
-        
+
         // 3. Читаем токен без валидации (только для извлечения claims)
         var handler = new JwtSecurityTokenHandler();
         var jwtToken = handler.ReadJwtToken(token);
-        
+
         // 4. Получаем userId из claims
         var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
-        
+
         if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
         {
             throw new UnauthorizedAccessException("Invalid user ID in token");
         }
-        
+
         return userId;
     }
     // Добавление активности
