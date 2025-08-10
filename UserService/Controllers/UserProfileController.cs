@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,7 @@ namespace UserService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize] // Требует аутентификации
+//[Authorize] // Требует аутентификации
 public class UserProfileController : ControllerBase
 {
     private readonly IUserProfileService FProfileService;
@@ -25,14 +26,31 @@ public class UserProfileController : ControllerBase
     // Получение ID пользователя из токена
     private Guid GetUserIdFromToken()
     {
-        var userIdClaim = FHttpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier);
+        // 1. Получаем заголовок Authorization
+        var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+        
+        if (string.IsNullOrEmpty(authHeader))
+        {
+            throw new UnauthorizedAccessException("Authorization header is missing");
+        }
+
+        // 2. Извлекаем токен (формат: "Bearer {token}")
+        var token = authHeader.Split(' ').Last();
+        
+        // 3. Читаем токен без валидации (только для извлечения claims)
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadJwtToken(token);
+        
+        // 4. Получаем userId из claims
+        var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
+        
         if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
         {
-            throw new UnauthorizedAccessException("Invalid user token");
+            throw new UnauthorizedAccessException("Invalid user ID in token");
         }
+        
         return userId;
     }
-
     // Добавление активности
     [HttpPost]
     public async Task<IActionResult> AddProfile([FromBody] UserProfileDto profileDto)
