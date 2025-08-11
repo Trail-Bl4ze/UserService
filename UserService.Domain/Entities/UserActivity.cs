@@ -15,10 +15,6 @@ namespace UserService.Domain.Entities
         [Required]
         public Guid UserId { get; set; }
 
-        [Column("coordinate")]
-        [Required]
-        public PhotoCoordinate Coordinate { get; set; }
-
         [Column("title")]
         public string? Title { get; set; }
 
@@ -28,14 +24,13 @@ namespace UserService.Domain.Entities
         [Column("image_urls")]
         [Required]
         public List<string> Images { get; set; }
-    }
 
-    public class PhotoCoordinate
-    {
         [Column("latitude")]
+        [Required]
         public double Latitude { get; set; }
 
         [Column("longitude")]
+        [Required]
         public double Longitude { get; set; }
     }
 }

@@ -35,14 +35,14 @@ public class UserActivitiesController : ControllerBase
 
     // Добавление активности
     [HttpPost]
-    public async Task<IActionResult> AddActivity([FromBody] UserActivityDTO activityDto)
+    public async Task<IActionResult> AddActivity([FromForm] UserActivityDTO activityDto)
     {
         try
         {
             var userId = GetUserIdFromToken();
-            activityDto.UserId = userId; // Привязываем к пользователю
+            activityDto.UserId = userId;
             
-            var result = await FActivityService.AddUserActivitysync(activityDto);
+            var result = await FActivityService.AddUserActivityAsync(activityDto);
             return Ok(result);
         }
         catch (Exception ex)

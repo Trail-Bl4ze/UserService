@@ -41,14 +41,13 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("12345678901234567890123456789012")),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(authSettings!.Secret)),
         ValidateIssuer = true,
-        ValidIssuer = "trailblaze",
+        ValidIssuer = authSettings!.Issuer,
         ValidateAudience = true,
-        ValidAudience = "trailblaze",
+        ValidAudience = authSettings!.Audience,
         ValidateLifetime = true,
         ClockSkew = TimeSpan.FromMinutes(1),
-        // Важно для корректного маппинга claims
         NameClaimType = ClaimTypes.NameIdentifier,
         RoleClaimType = ClaimTypes.Role
     };
@@ -59,12 +58,12 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.CustomSchemaIds(id => id.FullName!.Replace("+", "-"));
 
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme  // Изменили имя схемы
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
-        Name = "Authorization",  // Ключевое изменение!
+        Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,  // Изменили тип
+        Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
         BearerFormat = "JWT"
     });

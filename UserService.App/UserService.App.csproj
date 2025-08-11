@@ -10,7 +10,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+  <PackageReference Include="Amazon.S3" Version="0.34.0" />
+  <PackageReference Include="AWSSDK.S3" Version="4.0.6.4" />
   <PackageReference Include="Mapster" Version="7.4.2-pre02" />
+  <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
   <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.0" />
 </ItemGroup>
 </Project>
