@@ -35,13 +35,13 @@ public class UserActivitiesController : ControllerBase
 
     // Добавление активности
     [HttpPost]
-    public async Task<IActionResult> AddActivity([FromForm] UserActivityDTO activityDto)
+    public async Task<IActionResult> AddActivity([FromForm] UserActivityRequest activityDto)
     {
         try
         {
             var userId = GetUserIdFromToken();
             activityDto.UserId = userId;
-            
+
             var result = await FActivityService.AddUserActivityAsync(activityDto);
             return Ok(result);
         }
@@ -53,7 +53,7 @@ public class UserActivitiesController : ControllerBase
 
     // Обновление активности
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateActivity(Guid id, [FromBody] UserActivityDTO updateDto)
+    public async Task<IActionResult> UpdateActivity(Guid id, [FromForm] UserActivityRequest updateDto)
     {
         try
         {

@@ -39,41 +39,33 @@ public class UserActivityService : IUserActivityService
         );
     }
 
-    public async Task<UserActivityDTO> AddUserActivityAsync(UserActivityDTO userActivityDto)
+    public async Task<UserActivityResponse> AddUserActivityAsync(UserActivityRequest UserActivityRequest)
     {
-        var user = await FContext.Users.FirstOrDefaultAsync(u => u.Id == userActivityDto.UserId);
+        var user = await FContext.Users.FirstOrDefaultAsync(u => u.Id == UserActivityRequest.UserId);
         if (user == null)
             throw new Exception("Пользователь не найден");
 
         var imageUrls = new List<string>();
-        foreach (var imageFile in userActivityDto.ImageFiles)
+        foreach (var imageFile in UserActivityRequest.ImageFiles)
         {
             var imageUrl = await UploadFileToTimeWebAsync(imageFile);
             imageUrls.Add(imageUrl);
         }
 
-        var activity = new UserActivity
-        {
-            Id = Guid.NewGuid(),
-            UserId = userActivityDto.UserId,
-            Latitude = userActivityDto.Latitude,
-            Longitude = userActivityDto.Longitude,
-            Title = userActivityDto.Title,
-            Text = userActivityDto.Text,
-            Images = imageUrls,
-        };
-
+        var activity = UserActivityRequest.Adapt<UserActivity>();
+        activity.Images = imageUrls;
         await FContext.UserActivities.AddAsync(activity);
         await FContext.SaveChangesAsync();
 
-        return new UserActivityDTO
+        return new UserActivityResponse
         {
             Id = activity.Id,
             UserId = activity.UserId,
             Latitude = activity.Latitude,
             Longitude = activity.Longitude,
             Title = activity.Title,
-            Text = activity.Text
+            Text = activity.Text,
+            ImageLinks = activity.Images
         };
     }
 
@@ -94,12 +86,10 @@ public class UserActivityService : IUserActivityService
 
             await _s3Client.PutObjectAsync(request);
         }
-
-        // Формируем URL в зависимости от настроек TimeWeb Cloud
         return $"{_serviceUrl}/{_bucketName}/{fileKey}";
     }
 
-    public async Task<UserActivityDTO> UpdateUserActivityAsync(Guid userId, UserActivityDTO updateDto)
+    public async Task<UserActivityRequest> UpdateUserActivityAsync(Guid userId, UserActivityRequest updateDto)
     {
         var existingActivity = await FContext.UserActivities
             .FirstOrDefaultAsync(p => p.UserId == userId);
@@ -112,13 +102,13 @@ public class UserActivityService : IUserActivityService
         FContext.UserActivities.Update(existingActivity);
         await FContext.SaveChangesAsync();
 
-        return existingActivity.Adapt<UserActivityDTO>();
+        return existingActivity.Adapt<UserActivityRequest>();
     }
 
-    public async Task<List<UserActivityDTO>> GetAllUserActivitiesAsync(Guid userId)
+    public async Task<List<UserActivityRequest>> GetAllUserActivitiesAsync(Guid userId)
     {
         return FContext.UserActivities
-            .Where(p => p.UserId == userId).Adapt<List<UserActivityDTO>>();
+            .Where(p => p.UserId == userId).Adapt<List<UserActivityRequest>>();
     }
 
     public async Task<int> DeleteUserActivityAsync(Guid id)

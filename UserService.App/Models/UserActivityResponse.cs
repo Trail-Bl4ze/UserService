@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace UserService.App.Models
 {
-    public class UserActivityDTO
+    public class UserActivityResponse
     {
         public Guid Id { get; set; }
 
@@ -15,6 +15,6 @@ namespace UserService.App.Models
 
         public string? Text { get; set; }
 
-        public List<IFormFile> ImageFiles { get; set; } = new List<IFormFile>();
+        public virtual List<string> ImageLinks { get; set; } = new List<string>();
     }
 }
