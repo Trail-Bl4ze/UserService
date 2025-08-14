@@ -21,4 +21,8 @@ public class User
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public virtual UserProfile Profile { get; set; }
+    public virtual ICollection<Relationship> Followers { get; set; }
+    public virtual ICollection<Relationship> Following { get; set; }
 }

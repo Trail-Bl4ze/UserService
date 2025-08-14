@@ -41,87 +41,25 @@ public class UserActivityService : IUserActivityService
 
     public async Task<UserActivityResponse> AddUserActivityAsync(UserActivityRequest UserActivityRequest)
     {
-        var user = await FContext.Users.FirstOrDefaultAsync(u => u.Id == UserActivityRequest.UserId);
-        if (user == null)
-            throw new Exception("Пользователь не найден");
-
-        var imageUrls = new List<string>();
-        foreach (var imageFile in UserActivityRequest.ImageFiles)
-        {
-            var imageUrl = await UploadFileToTimeWebAsync(imageFile);
-            imageUrls.Add(imageUrl);
-        }
-
-        var activity = UserActivityRequest.Adapt<UserActivity>();
-        activity.Images = imageUrls;
-        await FContext.UserActivities.AddAsync(activity);
-        await FContext.SaveChangesAsync();
-
-        return new UserActivityResponse
-        {
-            Id = activity.Id,
-            UserId = activity.UserId,
-            Latitude = activity.Latitude,
-            Longitude = activity.Longitude,
-            Title = activity.Title,
-            Text = activity.Text,
-            ImageLinks = activity.Images
-        };
+        //TODO отправлять в сервис активностей
+        return new UserActivityResponse();
     }
 
-    private async Task<string> UploadFileToTimeWebAsync(IFormFile file)
+    public async Task<UserActivityResponse> UpdateUserActivityAsync(Guid userId, UserActivityRequest updateDto)
     {
-        var fileKey = $"user-activities/{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-
-        using (var stream = file.OpenReadStream())
-        {
-            var request = new Amazon.S3.Model.PutObjectRequest
-            {
-                BucketName = _bucketName,
-                Key = fileKey,
-                InputStream = stream,
-                ContentType = file.ContentType,
-                CannedACL = S3CannedACL.PublicRead
-            };
-
-            await _s3Client.PutObjectAsync(request);
-        }
-        return $"{_serviceUrl}/{_bucketName}/{fileKey}";
+        //TODO отправлять в сервис активностей
+        return new UserActivityResponse();
     }
 
-    public async Task<UserActivityRequest> UpdateUserActivityAsync(Guid userId, UserActivityRequest updateDto)
+    public async Task<List<UserActivityResponse>> GetAllUserActivitiesAsync(Guid userId)
     {
-        var existingActivity = await FContext.UserActivities
-            .FirstOrDefaultAsync(p => p.UserId == userId);
-
-        if (existingActivity == null)
-            throw new KeyNotFoundException("Активность не найдена");
-
-        updateDto.Adapt(existingActivity);
-
-        FContext.UserActivities.Update(existingActivity);
-        await FContext.SaveChangesAsync();
-
-        return existingActivity.Adapt<UserActivityRequest>();
-    }
-
-    public async Task<List<UserActivityRequest>> GetAllUserActivitiesAsync(Guid userId)
-    {
-        return FContext.UserActivities
-            .Where(p => p.UserId == userId).Adapt<List<UserActivityRequest>>();
+        //TODO отправлять в сервис активностей
+        return new List<UserActivityResponse>();
     }
 
     public async Task<int> DeleteUserActivityAsync(Guid id)
     {
-        var existingActivity = await FContext.UserActivities
-            .FirstOrDefaultAsync(p => p.Id == id);
-
-        if (existingActivity == null)
-            throw new KeyNotFoundException("Активность не найдена");
-
-        FContext.UserActivities.Remove(existingActivity);
-        int affectedRows = await FContext.SaveChangesAsync();
-        
-        return affectedRows;
+        //TODO отправлять в сервис активностей
+        return 0;
     }
 }
