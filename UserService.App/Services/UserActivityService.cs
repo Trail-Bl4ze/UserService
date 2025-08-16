@@ -1,8 +1,11 @@
+using System.Text.Json;
 using Amazon.S3;
 using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using UserService.App.BackgroundJobs;
 using UserService.App.Interfaces;
 using UserService.App.Models;
 using UserService.Domain;
@@ -12,54 +15,38 @@ namespace UserService.App.Services;
 
 public class UserActivityService : IUserActivityService
 {
-    private readonly UserDbContext FContext;
-    private readonly IAmazonS3 _s3Client;
-    private readonly string _bucketName;
-    private readonly string _serviceUrl;
+    private readonly KafkaProducerService _kafkaProducer;
+    private readonly ILogger<UserActivityService> _logger;
 
-    public UserActivityService(UserDbContext context, IConfiguration configuration)
+    public UserActivityService(KafkaProducerService kafkaProducer, ILogger<UserActivityService> logger)
     {
-        FContext = context;
-        
-        // Конфигурация для TimeWeb Cloud
-        _bucketName = configuration["TimeWeb:BucketName"];
-        _serviceUrl = configuration["TimeWeb:ServiceURL"];
-        
-        // Настройка S3 клиента для TimeWeb Cloud
-        var config = new AmazonS3Config
+        _kafkaProducer = kafkaProducer;
+        _logger = logger;
+    }
+
+    public async Task<bool> AddUserActivityAsync(UserActivityRequest request)
+    {
+         try
         {
-            ServiceURL = _serviceUrl,
-            ForcePathStyle = true
-        };
-        
-        _s3Client = new AmazonS3Client(
-            configuration["TimeWeb:AccessKey"],
-            configuration["TimeWeb:SecretKey"],
-            config
-        );
-    }
+            var message = JsonSerializer.Serialize(request);
 
-    public async Task<UserActivityResponse> AddUserActivityAsync(UserActivityRequest UserActivityRequest)
-    {
-        //TODO отправлять в сервис активностей
-        return new UserActivityResponse();
+            await _kafkaProducer.ProduceAsync(message);
+            
+            _logger.LogInformation("Activity sent to Kafka: {Message}", message);
+            
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send activity to Kafka");
+            return false;
+        }
     }
-
-    public async Task<UserActivityResponse> UpdateUserActivityAsync(Guid userId, UserActivityRequest updateDto)
-    {
-        //TODO отправлять в сервис активностей
-        return new UserActivityResponse();
-    }
+    
 
     public async Task<List<UserActivityResponse>> GetAllUserActivitiesAsync(Guid userId)
     {
         //TODO отправлять в сервис активностей
         return new List<UserActivityResponse>();
-    }
-
-    public async Task<int> DeleteUserActivityAsync(Guid id)
-    {
-        //TODO отправлять в сервис активностей
-        return 0;
     }
 }

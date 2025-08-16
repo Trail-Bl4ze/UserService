@@ -8,7 +8,7 @@ public class UserDbContext : DbContext
     public UserDbContext(DbContextOptions<UserDbContext> options)
         : base(options) { }
 
-    public DbSet<UserActivity> UserActivities => Set<UserActivity>();
+    public DbSet<Relationship> UserActivities => Set<Relationship>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
     public DbSet<User> Users => Set<User>();
 }

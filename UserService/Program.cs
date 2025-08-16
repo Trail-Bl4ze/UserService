@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using System.Text;
+using UserService.App.BackgroundJobs;
 using UserService.App.Interfaces;
 using UserService.App.Models;
 using UserService.App.Services;
@@ -25,6 +26,7 @@ builder.Services.AddDbContext<UserDbContext>(options =>
 // Регистрация сервисов приложения
 builder.Services.AddScoped<IUserActivityService, UserActivityService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+builder.Services.AddSingleton<KafkaProducerService>();
 builder.Services.AddHttpContextAccessor();
 
 // Конфигурация JWT

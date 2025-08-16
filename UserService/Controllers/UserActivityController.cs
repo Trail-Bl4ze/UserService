@@ -33,7 +33,6 @@ public class UserActivitiesController : ControllerBase
         return userId;
     }
 
-    // Добавление активности
     [HttpPost]
     public async Task<IActionResult> AddActivity([FromForm] UserActivityRequest activityDto)
     {
@@ -43,6 +42,11 @@ public class UserActivitiesController : ControllerBase
             activityDto.UserId = userId;
 
             var result = await FActivityService.AddUserActivityAsync(activityDto);
+            if (!result)
+            {
+                return BadRequest();
+            }
+        
             return Ok(result);
         }
         catch (Exception ex)
@@ -51,29 +55,6 @@ public class UserActivitiesController : ControllerBase
         }
     }
 
-    // Обновление активности
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateActivity(Guid id, [FromForm] UserActivityRequest updateDto)
-    {
-        try
-        {
-            var userId = GetUserIdFromToken();
-            updateDto.UserId = userId;
-            
-            var result = await FActivityService.UpdateUserActivityAsync(userId, updateDto);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
-
-    // Получение всех активностей пользователя
     [HttpGet]
     public async Task<IActionResult> GetAllActivities()
     {
@@ -82,30 +63,6 @@ public class UserActivitiesController : ControllerBase
             var userId = GetUserIdFromToken();
             var activities = await FActivityService.GetAllUserActivitiesAsync(userId);
             return Ok(activities);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
-
-    // Удаление активности
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteActivity(Guid id)
-    {
-        try
-        {
-            var userId = GetUserIdFromToken();
-            var affectedRows = await FActivityService.DeleteUserActivityAsync(id);
-            
-            if (affectedRows == 0)
-                return NotFound("Активность не найдена или не принадлежит пользователю");
-                
-            return Ok(new { Deleted = true });
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
         }
         catch (Exception ex)
         {
