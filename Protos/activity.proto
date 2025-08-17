@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "UserService.Grpc";
+
+service Activities {
+  rpc GetUserActivities (UserActivitiesRequest) returns (UserActivitiesResponse);
+  rpc GetActivityById (ActivityByIdRequest) returns (ActivityResponse);
+}
+
+message UserActivitiesRequest {
+  string user_id = 1;
+}
+
+message ActivityByIdRequest {
+  string id = 1;
+}
+
+message ActivityResponse {
+  string id = 1;
+  string user_id = 2;
+  string title = 3;
+  string description = 4;
+  google.protobuf.Timestamp created_at = 5;
+  double latitude = 6;
+  double longitude = 7;
+  int32 likes_count = 8;
+  int32 comments_count = 9;
+  repeated string images_urls = 10;
+}
+
+message UserActivitiesResponse {
+  repeated ActivityResponse activities = 1;
+}

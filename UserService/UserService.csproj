@@ -14,4 +14,7 @@
 <ItemGroup>
     <ProjectReference Include="../UserService.App/UserService.App.csproj" />
 </ItemGroup>
+<ItemGroup>
+  <Protobuf Include="..\Protos\activity.proto" GrpcServices="Client" Link="Protos\activity.proto" />
+</ItemGroup>
 </Project>

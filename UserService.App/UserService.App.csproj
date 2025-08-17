@@ -17,5 +17,11 @@
   <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
   <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
   <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.0" />
+  <PackageReference Include="Google.Protobuf" Version="3.32.0" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.71.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.72.0"/>
+</ItemGroup>
+<ItemGroup>
+  <Protobuf Include="..\Protos\activity.proto" GrpcServices="Client" Link="Protos\activity.proto" />
 </ItemGroup>
 </Project>

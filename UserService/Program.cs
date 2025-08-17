@@ -9,16 +9,35 @@ using UserService.App.Interfaces;
 using UserService.App.Models;
 using UserService.App.Services;
 using UserService.Domain;
+using UserService.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Конфигурация
 var configuration = builder.Configuration;
 
+builder.Services.AddGrpcClient<Activities.ActivitiesClient>(options =>
+{
+    options.Address = new Uri(configuration["Grpc:ActivityServiceUrl"]);
+})
+.ConfigurePrimaryHttpMessageHandler(() => 
+{
+    var handler = new HttpClientHandler();
+    
+    // Только для разработки - отключает проверку SSL сертификата
+    if (builder.Environment.IsDevelopment())
+    {
+        handler.ServerCertificateCustomValidationCallback = 
+            HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+    }
+    
+    return handler;
+});
+
 // Добавление сервисов
 builder.Services.AddControllers();
 
-var connectionString = builder.Configuration.GetConnectionString("PostgreSQL");
+var connectionString = configuration.GetConnectionString("PostgreSQL");
     
 builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseNpgsql(connectionString));
@@ -30,7 +49,7 @@ builder.Services.AddSingleton<KafkaProducerService>();
 builder.Services.AddHttpContextAccessor();
 
 // Конфигурация JWT
-var authSettings = builder.Configuration.GetSection("AuthenticationSettings").Get<AuthenticationSettings>();
+var authSettings = configuration.GetSection("AuthenticationSettings").Get<AuthenticationSettings>();
 
 // Настройка аутентификации
 builder.Services.AddAuthentication(options =>
