@@ -11,7 +11,7 @@ using UserService.App.Interfaces;
 using UserService.App.Models;
 using UserService.Domain;
 using UserService.Domain.Entities;
-using UserService.Grpc;
+using ActivityService.Grpc;
 
 namespace UserService.App.Services;
 
@@ -20,12 +20,12 @@ public class UserActivityService : IUserActivityService
     private readonly UserDbContext FContext;
     private readonly KafkaProducerService _kafkaProducer;
     private readonly ILogger<UserActivityService> _logger;
-    private readonly Activities.ActivitiesClient _grpcClient;
+    private readonly ActivitiesGrpc.ActivitiesGrpcClient _grpcClient;
     private readonly IAmazonS3 _s3Client;
     private readonly string _bucketName;
     private readonly string _serviceUrl;
 
-    public UserActivityService(UserDbContext context, Activities.ActivitiesClient grpcClient, KafkaProducerService kafkaProducer, ILogger<UserActivityService> logger, IConfiguration configuration)
+    public UserActivityService(UserDbContext context, ActivitiesGrpc.ActivitiesGrpcClient grpcClient, KafkaProducerService kafkaProducer, ILogger<UserActivityService> logger, IConfiguration configuration)
     {
         _grpcClient = grpcClient;
         FContext = context;
@@ -109,29 +109,29 @@ public class UserActivityService : IUserActivityService
         catch (Exception ex)
         {
             _logger.LogError(ex, "gRPC call failed");
-            throw; // или возвращаем пустой список в зависимости от требований
-        }
-    }
-
-    public async Task<List<UserActivityResponse>> GetActivityByIdAsync(Guid id)
-    {
-        try
-        {
-            var request = new ActivityByIdRequest { Id = id.ToString() };
-            var response = await _grpcClient.GetActivityByIdAsync(request);
-            
-            return new List<UserActivityResponse> { FromGrpcResponse(response) };
-        }
-        catch (RpcException ex) when (ex.StatusCode == StatusCode.NotFound)
-        {
-            return new List<UserActivityResponse>();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "gRPC call failed");
             throw;
         }
     }
+
+    // public async Task<List<UserActivityResponse>> GetActivityByIdAsync(Guid id)
+    // {
+    //     try
+    //     {
+    //         var request = new ActivityByIdRequest { Id = id.ToString() };
+    //         var response = await _grpcClient.GetActivityByIdAsync(request);
+            
+    //         return new List<UserActivityResponse> { FromGrpcResponse(response) };
+    //     }
+    //     catch (RpcException ex) when (ex.StatusCode == StatusCode.NotFound)
+    //     {
+    //         return new List<UserActivityResponse>();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _logger.LogError(ex, "gRPC call failed");
+    //         throw;
+    //     }
+    // }
 
     private static UserActivityResponse FromGrpcResponse(ActivityResponse grpcResponse)
     {

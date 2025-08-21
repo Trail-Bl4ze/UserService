@@ -2,19 +2,16 @@ syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
 
-option csharp_namespace = "UserService.Grpc";
+option csharp_namespace = "ActivityService.Grpc";
 
-service Activities {
+package activity.grpc;
+
+service ActivitiesGrpc {
   rpc GetUserActivities (UserActivitiesRequest) returns (UserActivitiesResponse);
-  rpc GetActivityById (ActivityByIdRequest) returns (ActivityResponse);
 }
 
 message UserActivitiesRequest {
   string user_id = 1;
-}
-
-message ActivityByIdRequest {
-  string id = 1;
 }
 
 message ActivityResponse {

@@ -1,3 +1,5 @@
+using ActivityService.Grpc;
+using Grpc.Net.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -9,16 +11,15 @@ using UserService.App.Interfaces;
 using UserService.App.Models;
 using UserService.App.Services;
 using UserService.Domain;
-using UserService.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Конфигурация
 var configuration = builder.Configuration;
 
-builder.Services.AddGrpcClient<Activities.ActivitiesClient>(options =>
+builder.Services.AddGrpcClient<ActivitiesGrpc.ActivitiesGrpcClient>(options =>
 {
-    options.Address = new Uri(configuration["Grpc:ActivityServiceUrl"]);
+    options.Address = new Uri(configuration["ActivityServiceUrl"]);
 })
 .ConfigurePrimaryHttpMessageHandler(() => 
 {
